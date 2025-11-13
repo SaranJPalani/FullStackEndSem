@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h2>Amma's Healing Portal</h2>
+                    <p>Your trusted healthcare companion</p>
+                </div>
+                
+                <div class="auth-forms-wrapper">
+                    <!-- Login Form -->
+                    <form id="login-form" class="auth-form active">
+                        <h3>Welcome Back</h3>
+                        <p class="form-subtitle">Sign in to access your health products</p>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="login-email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" required placeholder="Enter your password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Sign In</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                        <p class="auth-toggle">Don't have an account? <a href="#" id="show-register">Register here</a></p>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="register-form" class="auth-form">
+                        <h3>Create Account</h3>
+                        <p class="form-subtitle">Join Amma's Healing community today</p>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="register-name" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="register-email" required placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="register-password" required minlength="6" placeholder="Create a strong password">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="register-phone" required placeholder="Enter your phone number">
+                        </div>
+                        <div class="form-group">
+                            <label>Address Details</label>
+                            <input type="text" id="register-street" placeholder="Street Address" required>
+                            <div class="form-row">
+                                <input type="text" id="register-city" placeholder="City" required>
+                                <input type="text" id="register-state" placeholder="State">
+                            </div>
+                            <input type="text" id="register-pincode" placeholder="Pincode" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Create Account</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                        <p class="auth-toggle">Already have an account? <a href="#" id="show-login">Login here</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        // Tab switching with smooth animation
+        document.getElementById('show-register')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('login-form').classList.remove('active');
+            document.getElementById('register-form').classList.add('active');
+        });
+
+        document.getElementById('show-login')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('register-form').classList.remove('active');
+            document.getElementById('login-form').classList.add('active');
+        });
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data));
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.message;
+                }
+            } catch (error) {
+                errorEl.textContent = 'Login failed. Please try again.';
+            }
+        });
+
+        // Register
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                name: document.getElementById('register-name').value,
+                email: document.getElementById('register-email').value,
+                password: document.getElementById('register-password').value,
+                phone: document.getElementById('register-phone').value,
+                address: {
+                    street: document.getElementById('register-street').value,
+                    city: document.getElementById('register-city').value,
+                    state: document.getElementById('register-state').value,
+                    pincode: document.getElementById('register-pincode').value
+                }
+            };
+
+            const errorEl = document.getElementById('register-error');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data));
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.message;
+                }
+            } catch (error) {
+                errorEl.textContent = 'Registration failed. Please try again.';
+            }
+        });
+    </script>
+</body>
+</html>

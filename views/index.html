@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/cart">Cart <span id="cart-count" class="badge">0</span></a>
+                <a href="/orders" id="orders-link" style="display: none;">Orders</a>
+                <a href="/profile" id="profile-link" style="display: none;">Profile</a>
+                <a href="/admin" id="admin-link" style="display: none;">Admin</a>
+                <div id="notification-bell" style="display: none;">
+                    <span class="notification-icon">🔔</span>
+                    <span id="notification-count" class="badge">0</span>
+                </div>
+                <button id="auth-btn" class="btn btn-primary">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel" class="notification-panel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button id="mark-all-read" class="btn-text">Mark all read</button>
+        </div>
+        <div id="notification-list"></div>
+    </div>
+
+    <!-- Flash Sale Banner -->
+    <div id="flash-sale-banner" class="flash-sale-banner" style="display: none;">
+        <div class="container">
+            <h2>⚡ Flash Sale!</h2>
+            <p id="flash-sale-text">Limited time offers available!</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>Welcome to Amma's Healing</h2>
+            <p>Your trusted source for health and wellness</p>
+        </div>
+    </section>
+
+    <!-- Search and Filter -->
+    <section class="filters">
+        <div class="container">
+            <div class="filter-bar">
+                <input type="text" id="search-input" placeholder="Search products...">
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                    <option value="Food">Refreshments</option>
+                    <option value="Home">Home & Kitchen</option>
+                    <option value="Beauty">Medicine</option>
+                </select>
+                <button id="search-btn" class="btn btn-secondary">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products">
+        <div class="container">
+            <h2>Featured Products</h2>
+            <div id="products-grid" class="products-grid">
+                <div class="loading">Loading products...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot -->
+    <div id="chatbot" class="chatbot">
+        <div class="chatbot-header" id="chatbot-toggle">
+            <span>💬 Chat Support</span>
+            <span id="chat-indicator">▼</span>
+        </div>
+        <div id="chatbot-body" class="chatbot-body" style="display: none;">
+            <div id="chat-messages" class="chat-messages">
+                <div class="bot-message">Hi! How can I help you today?</div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Type your message...">
+                <button id="chat-send" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Amma's Healing. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/products.js"></script>
+    <script src="/js/flashsale.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

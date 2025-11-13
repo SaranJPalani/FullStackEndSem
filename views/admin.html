@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing Admin</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <button id="auth-btn" class="btn btn-primary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="admin-section">
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Sales</h3>
+                    <p class="stat-value" id="total-sales">₹0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <p class="stat-value" id="total-orders">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Customers</h3>
+                    <p class="stat-value" id="total-customers">0</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="products">Products</button>
+                <button class="tab-btn" data-tab="orders">Orders</button>
+                <button class="tab-btn" data-tab="leaderboard">Top Buyers</button>
+                <button class="tab-btn" data-tab="analytics">Analytics</button>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content active">
+                <div class="tab-header">
+                    <h2>Products Management</h2>
+                    <button class="btn btn-primary" onclick="showAddProductForm()">+ Add Product</button>
+                </div>
+
+                <div id="add-product-form" style="display: none;" class="form-card">
+                    <h3>Add New Product</h3>
+                    <form id="product-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Name *</label>
+                                <input type="text" id="product-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Price *</label>
+                                <input type="number" id="product-price" required min="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description *</label>
+                            <textarea id="product-description" required rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category *</label>
+                                <select id="product-category" required>
+                                    <option value="Food">Refreshments</option>
+                                    <option value="Home">Home & Kitchen</option>
+                                    <option value="Beauty">Medicine</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Stock *</label>
+                                <input type="number" id="product-stock" required min="0">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Product</button>
+                            <button type="button" class="btn btn-secondary" onclick="hideAddProductForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="products-list"></div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders-tab" class="tab-content">
+                <h2>All Orders</h2>
+                <div id="orders-list"></div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content">
+                <h2>Sales Analytics</h2>
+                <div id="analytics-content"></div>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboard-tab" class="tab-content">
+                <h2>🏆 Top Buyers Leaderboard</h2>
+                <div class="leaderboard-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Customer</th>
+                                <th>Total Spent</th>
+                                <th>Total Orders</th>
+                                <th>Avg Order Value</th>
+                                <th>Last Order</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <tr><td colspan="6">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flash Sale Modal -->
+    <div id="flash-sale-modal" class="modal">
+        <div class="modal-content">
+            <h2>Set Flash Sale</h2>
+            <form id="flash-sale-form">
+                <input type="hidden" id="flash-product-id">
+                <input type="hidden" id="flash-original-price">
+                
+                <div class="form-group">
+                    <label>Original Price</label>
+                    <input type="text" id="display-original-price" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label>Sale Price * <small>(Must be less than original price)</small></label>
+                    <input type="number" id="flash-sale-price" required min="0" step="0.01">
+                    <small id="discount-percentage" style="color: #28a745; font-weight: bold;"></small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Duration</label>
+                    <div class="duration-buttons">
+                        <button type="button" class="duration-btn" onclick="setDuration(1)">1 Hour</button>
+                        <button type="button" class="duration-btn" onclick="setDuration(6)">6 Hours</button>
+                        <button type="button" class="duration-btn" onclick="setDuration(12)">12 Hours</button>
+                        <button type="button" class="duration-btn" onclick="setDuration(24)">24 Hours</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>End Time * <small>(Or set custom time)</small></label>
+                    <input type="datetime-local" id="flash-end-time" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Activate Flash Sale</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeFlashSaleModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token || user.role !== 'admin') {
+            alert('Access denied. Admin only.');
+            window.location.href = '/';
+        }
+
+        document.getElementById('auth-btn').onclick = () => {
+            localStorage.clear();
+            window.location.href = '/';
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                document.getElementById(`${tab}-tab`).classList.add('active');
+                
+                if (tab === 'products') loadProducts();
+                if (tab === 'orders') loadOrders();
+                if (tab === 'analytics') loadAnalytics();
+                if (tab === 'leaderboard') loadLeaderboard();
+            });
+        });
+
+        // Load initial data
+        loadProducts();
+        loadAnalytics();
+
+        function showAddProductForm() {
+            document.getElementById('add-product-form').style.display = 'block';
+        }
+
+        function hideAddProductForm() {
+            document.getElementById('add-product-form').style.display = 'none';
+            document.getElementById('product-form').reset();
+        }
+
+        // Add Product
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const productData = {
+                name: document.getElementById('product-name').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                description: document.getElementById('product-description').value,
+                category: document.getElementById('product-category').value,
+                stock: parseInt(document.getElementById('product-stock').value)
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Product added successfully!');
+                    hideAddProductForm();
+                    loadProducts();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Failed to add product');
+            }
+        });
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayProducts(data.data);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function displayProducts(products) {
+            const html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${products.map(p => `
+                            <tr>
+                                <td>${p.name}</td>
+                                <td>₹${p.price}</td>
+                                <td>${p.category}</td>
+                                <td>${p.stock}</td>
+                                <td>
+                                    <button class="btn-small btn-primary" onclick="showFlashSale('${p._id}', ${p.price})">Flash Sale</button>
+                                    <button class="btn-small btn-danger" onclick="deleteProduct('${p._id}')">Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('products-list').innerHTML = html;
+        }
+
+        function showFlashSale(productId, price) {
+            document.getElementById('flash-product-id').value = productId;
+            document.getElementById('flash-original-price').value = price;
+            document.getElementById('display-original-price').value = '₹' + price.toFixed(2);
+            document.getElementById('flash-sale-price').value = (price * 0.8).toFixed(2);
+            
+            // Set max to original price
+            document.getElementById('flash-sale-price').setAttribute('max', price);
+            
+            // Calculate initial discount
+            calculateDiscount();
+            
+            // Set default to 24 hours from now
+            setDuration(24);
+            
+            document.getElementById('flash-sale-modal').style.display = 'flex';
+        }
+
+        function closeFlashSaleModal() {
+            document.getElementById('flash-sale-modal').style.display = 'none';
+            document.getElementById('discount-percentage').textContent = '';
+        }
+
+        function setDuration(hours) {
+            const now = new Date();
+            const endTime = new Date(now.getTime() + hours * 60 * 60 * 1000);
+            
+            // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+            const year = endTime.getFullYear();
+            const month = String(endTime.getMonth() + 1).padStart(2, '0');
+            const day = String(endTime.getDate()).padStart(2, '0');
+            const hour = String(endTime.getHours()).padStart(2, '0');
+            const minute = String(endTime.getMinutes()).padStart(2, '0');
+            
+            const formattedDateTime = `${year}-${month}-${day}T${hour}:${minute}`;
+            document.getElementById('flash-end-time').value = formattedDateTime;
+        }
+
+        function calculateDiscount() {
+            const originalPrice = parseFloat(document.getElementById('flash-original-price').value);
+            const salePrice = parseFloat(document.getElementById('flash-sale-price').value);
+            
+            if (salePrice && originalPrice && salePrice < originalPrice) {
+                const discount = ((originalPrice - salePrice) / originalPrice * 100).toFixed(0);
+                document.getElementById('discount-percentage').textContent = `🔥 ${discount}% OFF!`;
+            } else if (salePrice >= originalPrice) {
+                document.getElementById('discount-percentage').textContent = '⚠️ Sale price must be less than ₹' + originalPrice.toFixed(2);
+            } else {
+                document.getElementById('discount-percentage').textContent = '';
+            }
+        }
+
+        // Calculate discount on price change
+        document.addEventListener('DOMContentLoaded', () => {
+            const salePriceInput = document.getElementById('flash-sale-price');
+            if (salePriceInput) {
+                salePriceInput.addEventListener('input', calculateDiscount);
+            }
+        });
+
+        document.getElementById('flash-sale-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const productId = document.getElementById('flash-product-id').value;
+            const saleData = {
+                isActive: true,
+                salePrice: parseFloat(document.getElementById('flash-sale-price').value),
+                endTime: new Date(document.getElementById('flash-end-time').value)
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/admin/products/${productId}/flash-sale`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(saleData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Flash sale activated!');
+                    closeFlashSaleModal();
+                    loadProducts();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Failed to set flash sale');
+            }
+        });
+
+        async function deleteProduct(id) {
+            if (!confirm('Delete this product?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Product deleted');
+                    loadProducts();
+                }
+            } catch (error) {
+                alert('Failed to delete product');
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/admin/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayOrders(data.data);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function displayOrders(orders) {
+            const html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orders.map(o => `
+                            <tr>
+                                <td>${o.orderId}</td>
+                                <td>${o.userId?.name || 'N/A'}</td>
+                                <td>₹${o.totalAmount}</td>
+                                <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+                                <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <select onchange="updateOrderStatus('${o._id}', this.value)">
+                                        <option value="">Update Status</option>
+                                        <option value="processing">Processing</option>
+                                        <option value="shipped">Shipped</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('orders-list').innerHTML = html;
+        }
+
+        async function updateOrderStatus(orderId, status) {
+            if (!status) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Order status updated');
+                    loadOrders();
+                }
+            } catch (error) {
+                alert('Failed to update status');
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${API_URL}/admin/analytics`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayAnalytics(data.data);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function displayAnalytics(analytics) {
+            document.getElementById('total-sales').textContent = `₹${analytics.sales.total}`;
+            document.getElementById('total-orders').textContent = analytics.sales.orders;
+            document.getElementById('total-customers').textContent = analytics.users.customers;
+
+            const html = `
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>🏆 Top 10 Products (All Time)</h3>
+                        <div class="top-products-list">
+                            ${analytics.topProducts.map((p, index) => `
+                                <div class="top-product-item">
+                                    <span class="product-rank">#${index + 1}</span>
+                                    <div class="product-details">
+                                        <strong>${p.product.name}</strong>
+                                        <div class="product-stats">
+                                            <span class="stat-badge">📦 ${p.totalQuantity} sold</span>
+                                            <span class="stat-badge revenue">💰 ₹${p.totalRevenue.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>📈 Sales Trend (Last 7 Days)</h3>
+                        <canvas id="salesChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            `;
+            document.getElementById('analytics-content').innerHTML = html;
+
+            // Create the sales trend chart
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            
+            // Format dates for display
+            const labels = analytics.salesTrend.map(s => {
+                const date = new Date(s._id);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const salesData = analytics.salesTrend.map(s => s.sales);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sales Amount (₹)',
+                        data: salesData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                },
+                                label: function(context) {
+                                    const orderCount = analytics.salesTrend[context.dataIndex].orders;
+                                    const amount = context.parsed.y;
+                                    return [
+                                        `💰 Sales: ₹${amount.toFixed(2)}`,
+                                        `📦 Orders: ${orderCount}`,
+                                        `📊 Avg: ₹${(amount / orderCount).toFixed(2)}/order`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load Leaderboard
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/admin/leaderboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayLeaderboard(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        function displayLeaderboard(buyers) {
+            const tbody = document.getElementById('leaderboard-body');
+            
+            if (buyers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No data available yet</td></tr>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+            
+            const html = buyers.map((buyer, index) => {
+                const rank = index + 1;
+                const medal = medals[index] || `#${rank}`;
+                const lastOrder = new Date(buyer.lastOrderDate).toLocaleDateString();
+                
+                return `
+                    <tr class="leaderboard-row rank-${rank}">
+                        <td class="rank-cell">
+                            <span class="rank-badge">${medal}</span>
+                        </td>
+                        <td>
+                            <div class="customer-info">
+                                <strong>${buyer.name}</strong>
+                                <small>${buyer.email}</small>
+                            </div>
+                        </td>
+                        <td class="amount-cell">₹${buyer.totalSpent.toFixed(2)}</td>
+                        <td>${buyer.totalOrders}</td>
+                        <td>₹${buyer.averageOrderValue.toFixed(2)}</td>
+                        <td>${lastOrder}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = html;
+        }
+    </script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

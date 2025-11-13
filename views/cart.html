@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/cart">Cart</a>
+                <a href="/orders" id="orders-link" style="display: none;">Orders</a>
+                <button id="auth-btn" class="btn btn-primary">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="cart-section">
+        <div class="container">
+            <h1>Shopping Cart</h1>
+            
+            <div id="cart-content">
+                <div class="loading">Loading cart...</div>
+            </div>
+
+            <div id="cart-empty" style="display: none;" class="empty-state">
+                <h2>Your cart is empty</h2>
+                <p>Add some products to get started!</p>
+                <a href="/" class="btn btn-primary">Continue Shopping</a>
+            </div>
+
+            <div id="cart-items" style="display: none;">
+                <div class="cart-items-list"></div>
+                
+                <div class="cart-summary">
+                    <h3>Order Summary</h3>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="cart-subtotal">₹0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span id="cart-shipping">FREE</span>
+                    </div>
+                    <div class="summary-row total">
+                        <strong>Total:</strong>
+                        <strong id="cart-total">₹0</strong>
+                    </div>
+                    <button id="checkout-btn" class="btn btn-primary btn-block">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="/js/cart.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

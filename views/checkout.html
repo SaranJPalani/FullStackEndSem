@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/cart">Cart</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="checkout-section">
+        <div class="container">
+            <h1>Checkout</h1>
+            
+            <div class="checkout-grid">
+                <div class="checkout-form">
+                    <h2>Shipping Information</h2>
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone *</label>
+                            <input type="tel" id="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Street Address *</label>
+                            <input type="text" id="street" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>City *</label>
+                                <input type="text" id="city" required>
+                            </div>
+                            <div class="form-group">
+                                <label>State</label>
+                                <input type="text" id="state">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Pincode *</label>
+                            <input type="text" id="pincode" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">Place Order</button>
+                        <div id="checkout-error" class="error-message"></div>
+                    </form>
+                </div>
+
+                <div class="order-summary-box">
+                    <h2>Order Summary</h2>
+                    <div id="order-items"></div>
+                    <div class="summary-totals">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="order-subtotal">₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping:</span>
+                            <span>FREE</span>
+                        </div>
+                        <div class="summary-row total">
+                            <strong>Total:</strong>
+                            <strong id="order-total">₹0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <h2>✅ Order Placed Successfully!</h2>
+            <p>Your order ID: <strong id="order-id"></strong></p>
+            <p>Thank you for your purchase. You will receive a confirmation email shortly.</p>
+            <button id="view-orders" class="btn btn-primary">View Orders</button>
+            <button id="continue-shopping" class="btn btn-secondary">Continue Shopping</button>
+        </div>
+    </div>
+
+    <script src="/js/checkout.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

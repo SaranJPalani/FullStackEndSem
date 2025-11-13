@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/cart">Cart <span id="cart-count" class="badge">0</span></a>
+                <button id="auth-btn" class="btn btn-primary">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="product-detail">
+        <div class="container">
+            <div id="product-content">
+                <div class="loading">Loading product...</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const productId = window.location.pathname.split('/').pop();
+
+        // Check auth
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const authBtn = document.getElementById('auth-btn');
+
+        if (token) {
+            authBtn.textContent = 'Logout';
+            authBtn.onclick = () => {
+                localStorage.clear();
+                window.location.href = '/';
+            };
+        } else {
+            authBtn.onclick = () => window.location.href = '/login';
+        }
+
+        // Load product
+        async function loadProduct() {
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayProduct(data.data);
+                }
+            } catch (error) {
+                document.getElementById('product-content').innerHTML = '<p>Error loading product</p>';
+            }
+        }
+
+        function displayProduct(product) {
+            const isFlashSale = product.flashSale?.isActive && new Date(product.flashSale.endTime) > new Date();
+            const currentPrice = isFlashSale ? product.flashSale.salePrice : product.price;
+
+            const html = `
+                <div class="product-detail-grid">
+                    <div class="product-image-large">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
+                        ${isFlashSale ? '<div class="flash-badge">⚡ FLASH SALE</div>' : ''}
+                    </div>
+                    <div class="product-info-detail">
+                        <h1>${product.name}</h1>
+                        <div class="product-category">${product.category}</div>
+                        <div class="product-price-large">
+                            ${isFlashSale ? `<span class="original-price">₹${product.price}</span>` : ''}
+                            <span class="current-price">₹${currentPrice}</span>
+                        </div>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-stock">
+                            ${product.stock > 0 ? `✅ In Stock (${product.stock} available)` : '❌ Out of Stock'}
+                        </div>
+                        ${product.stock > 0 ? `
+                            <div class="quantity-selector">
+                                <label>Quantity:</label>
+                                <input type="number" id="quantity" value="1" min="1" max="${product.stock}">
+                            </div>
+                            <button class="btn btn-primary btn-block" onclick="addToCart('${product._id}')">
+                                Add to Cart
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-secondary btn-block" onclick="window.location.href='/'">
+                            Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('product-content').innerHTML = html;
+        }
+
+        async function addToCart(productId) {
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            try {
+                const response = await fetch(`${API_URL}/cart`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ productId, quantity })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Product added to cart!');
+                    window.location.href = '/cart';
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Failed to add to cart');
+            }
+        }
+
+        loadProduct();
+    </script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

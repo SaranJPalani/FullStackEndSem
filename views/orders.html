@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Amma's Healing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Amma's Healing</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/cart">Cart</a>
+                <a href="/orders">Orders</a>
+                <button id="auth-btn" class="btn btn-primary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="orders-section">
+        <div class="container">
+            <h1>My Orders</h1>
+            
+            <div id="orders-content">
+                <div class="loading">Loading orders...</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        document.getElementById('auth-btn').onclick = () => {
+            localStorage.clear();
+            window.location.href = '/';
+        };
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayOrders(data.data);
+                }
+            } catch (error) {
+                document.getElementById('orders-content').innerHTML = '<p>Error loading orders</p>';
+            }
+        }
+
+        function displayOrders(orders) {
+            if (orders.length === 0) {
+                document.getElementById('orders-content').innerHTML = `
+                    <div class="empty-state">
+                        <h2>No orders yet</h2>
+                        <a href="/" class="btn btn-primary">Start Shopping</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <strong>Order ID:</strong> ${order.orderId}<br>
+                            <strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}
+                        </div>
+                        <div>
+                            <span class="status-badge status-${order.status}">${order.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span>${item.name} x ${item.quantity}</span>
+                                <span>₹${item.price * item.quantity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-footer">
+                        <strong>Total: ₹${order.totalAmount}</strong>
+                        <span class="payment-status">${order.paymentStatus}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('orders-content').innerHTML = html;
+        }
+
+        loadOrders();
+    </script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>
