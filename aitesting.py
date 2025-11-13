@@ -3,7 +3,7 @@ import google.generativeai as genai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-genai.configure(api_key="AIzaSyDtTTvRIWq-iA0UZvTZWUwaEhr4DJfDwoE")
+genai.configure()
 
 model = genai.GenerativeModel('models/gemini-pro-latest')
 
